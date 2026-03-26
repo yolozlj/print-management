@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>印刷管理平台 - 专业印刷品订单管理系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdmirror.com/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://static0.xesimg.com/alading-resources/css/css2.css?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <style>
+        * {
+            font-family: "PingFang SC", Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-gray {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gray:hover {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-item {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -5px;
+            left: 50%;
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .nav-item.active:after,
+        .nav-item:hover:after {
+            width: 100%;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 表单样式 */
+        .form-input {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .form-input:focus {
+            border-color: #f59e0b;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+        
+        .form-select {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+        
+        .form-select:disabled {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+        
+        .form-select:focus {
+            border-color: #f59e0b;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 95vw;
+            max-height: 95vh;
+            overflow: auto;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+        
+        /* 复选框样式 */
+        .custom-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: white;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        /* 小号表格输入框 */
+        .table-input {
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            min-width: 80px;
+        }
+        
+        .table-input:focus {
+            border-color: #f59e0b;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+        }
+
+        .table-select {
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            min-width: 100px;
+            background: white;
+        }
+        
+        .table-select:focus {
+            border-color: #f59e0b;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+        }
+
+        .cost-savings {
+            color: #059669;
+            font-weight: bold;
+        }
+
+        /* Loading样式 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #f59e0b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 加载提示样式 */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+        }
+
+        /* 单价匹配指示器 */
+        .price-matched {
+            background-color: #dcfce7;
+            border-color: #16a34a;
+        }
+
+        .price-not-matched {
+            background-color: #fef2f2;
+            border-color: #dc2626;
+        }
+
+        .price-info {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            white-space: nowrap;
+        }
+
+        .price-info.matched {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .price-info.not-matched {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+        
+        /* 页面显示控制 */
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+
+        /* 保存状态指示器 */
+        .btn-saving {
+            background: #6b7280 !important;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* 订单状态标签 */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-submitted {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        /* 表格行悬停效果 */
+        .order-row {
+            transition: all 0.2s ease;
+        }
+
+        .order-row:hover {
+            background-color: #f9fafb;
+            transform: translateX(2px);
+        }
+
+        /* 操作按钮样式 */
+        .action-btn {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn.edit {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .action-btn.view {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        /* 表格加载状态 */
+        .table-loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* 查询表单样式 */
+        .query-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        .query-form .form-input,
+        .query-form .form-select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        /* 查询按钮组 */
+        .query-buttons {
+            gap: 0.75rem;
+        }
+
+        .query-buttons .btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+        }
+
+        /* 统计信息卡片 */
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* 提交状态按钮 */
+        .btn-submitting {
+            background: #6b7280 !important;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* BOM表格样式优化 */
+        .bom-row {
+            transition: all 0.2s ease;
+        }
+
+        .bom-row:hover {
+            background-color: #f9fafb;
+            transform: translateX(2px);
+        }
+
+        /* 价格区间标签 */
+        .quantity-range {
+            background-color: #eff6ff;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* 单价显示优化 */
+        .unit-price {
+            color: #059669;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* 错误提示样式 */
+        .error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #dc2626;
+        }
+
+        .error-message i {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 全局加载提示 -->
+    <div id="globalLoading" class="loading-indicator hidden">
+        <div class="flex flex-col items-center">
+            <div class="loading mb-4"></div>
+            <div class="text-gray-600">正在加载数据...</div>
+            <div class="text-sm text-gray-500 mt-2" id="loadingProgress">已加载 0 条记录</div>
+        </div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 bg-white shadow-lg z-50 h-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div class="flex items-center justify-between h-full">
+                <!-- Logo区域 -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                        <i class="fas fa-print text-white text-lg"></i>
+                    </div>
+                    <div class="text-xl font-bold gradient-text">印刷管理平台</div>
+                </div>
+                
+                <!-- 中间导航 -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="nav-item text-gray-700 hover:text-orange-500 font-medium py-2 cursor-pointer" data-page="home">首页</a>
+                    <a href="#" class="nav-item active text-gray-700 hover:text-orange-500 font-medium py-2 cursor-pointer" data-page="products">产品BOM</a>
+                    <a href="#" class="nav-item text-gray-700 hover:text-orange-500 font-medium py-2 cursor-pointer" data-page="create-order">创建订单</a>
+                    <a href="#" class="nav-item text-gray-700 hover:text-orange-500 font-medium py-2 cursor-pointer" data-page="query-order">查询订单</a>
+                </div>
+                
+                <!-- 右侧区域 -->
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center cursor-pointer hover:shadow-lg transition-shadow">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="pt-16">
+        <!-- 产品BOM页面内容 -->
+        <section id="products-content" class="page-content min-h-screen active">
+            <div class="py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- 页面标题 -->
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">产品BOM管理</h1>
+                        <p class="text-gray-600">管理和查询产品物料清单，包含印刷规格、定价信息等详细配置</p>
+                    </div>
+
+                    <!-- 统计信息卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="stats-card rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-blue-100">
+                                    <i class="fas fa-cubes text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500">总BOM数量</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="totalBomCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-green-100">
+                                    <i class="fas fa-building text-green-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500">分校数量</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="totalBranchCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-purple-100">
+                                    <i class="fas fa-tags text-purple-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500">产品类型</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="totalTypeCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-card rounded-xl p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-orange-100">
+                                    <i class="fas fa-list-ul text-orange-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500">配置项目</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="totalConfigCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 查询表单 -->
+                    <div class="query-form rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">所属分校</label>
+                                <select class="form-select" id="bomQueryBranch">
+                                    <option value="">全部分校</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">类型</label>
+                                <select class="form-select" id="bomQueryType">
+                                    <option value="">全部类型</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">产品名称</label>
+                                <input type="text" class="form-input" id="bomQueryProductName" placeholder="请输入产品名称">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">成品尺寸</label>
+                                <select class="form-select" id="bomQuerySize">
+                                    <option value="">全部尺寸</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">装订要求</label>
+                                <select class="form-select" id="bomQueryBinding">
+                                    <option value="">全部装订</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">纸张种类</label>
+                                <select class="form-select" id="bomQueryPaperType">
+                                    <option value="">全部纸张</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">印刷要求</label>
+                                <select class="form-select" id="bomQueryPrint">
+                                    <option value="">全部印刷</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">纸张品牌</label>
+                                <select class="form-select" id="bomQueryPaperBrand">
+                                    <option value="">全部品牌</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 查询按钮 -->
+                        <div class="flex flex-wrap items-center query-buttons">
+                            <button class="btn btn-primary text-white flex items-center" onclick="searchBomData()">
+                                <i class="fas fa-search mr-2"></i>查询BOM
+                            </button>
+                            <button class="btn btn-gray flex items-center" onclick="resetBomQueryForm()">
+                                <i class="fas fa-undo mr-2"></i>重置条件
+                            </button>
+                            <button class="btn btn-secondary text-white flex items-center" onclick="exportBomData()">
+                                <i class="fas fa-download mr-2"></i>导出Excel
+                            </button>
+                            <button class="btn btn-primary text-white flex items-center" onclick="refreshBomData()">
+                                <i class="fas fa-sync-alt mr-2"></i>刷新数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- BOM列表 -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-800">产品BOM列表</h3>
+                                <span class="text-sm text-gray-500" id="bomCount">共 0 条记录</span>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序号</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">所属分校</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">产品名称</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成品尺寸</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">装订要求</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">封面/内页</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">纸张种类</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">纸张品牌</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">印刷要求</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">工艺要求</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">单BOM数量</th>
+                                        <th class="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bomTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- 初始加载状态 -->
+                                    <tr id="bomLoadingRow">
+                                        <td colspan="13" class="table-loading">
+                                            <div class="flex flex-col items-center">
+                                                <div class="loading mb-2"></div>
+                                                <div>正在加载BOM数据...</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 其他页面内容占位... -->
+        <section id="home-content" class="page-content"></section>
+        <section id="create-order-content" class="page-content"></section>
+        <section id="query-order-content" class="page-content"></section>
+
+    </main>
+
+    <script>
+        // 产品BOM表API配置（修正后）
+        const BOM_API_CONFIG = {
+            baseUrl: 'https://yach-teable.zhiyinlou.com',
+            token: 'teable_acc7PlfHptFZ2V6JVgM_Szk+5OQCdyv0P1sIkmHRBTjExuOniSkvy17BYF2ONJU=',
+            endpoint: 'https://yach-teable.zhiyinlou.com/api/table/tblyl9Gu8RsxCLUC1fC/record'
+        };
+
+        // 页面数据对象
+        const pageData = {
+            bomData: []
+        };
+
+        // 获取BOM数据（修正版本 - 增加详细错误处理和调试信息）
+        async function fetchBomData() {
+            try {
+                showGlobalLoading(true);
+                console.log('开始获取BOM数据...');
+                
+                const allRecords = [];
+                let skip = 0;
+                const take = 1000;
+                let requestCount = 0;
+                
+                while (true) {
+                    requestCount++;
+                    console.log(`发送第 ${requestCount} 个API请求，skip=${skip}, take=${take}`);
+                    
+                    const url = `${BOM_API_CONFIG.endpoint}?fieldKeyType=name&take=${take}&skip=${skip}`;
+                    console.log('请求URL:', url);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${BOM_API_CONFIG.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    console.log('API响应状态:', response.status, response.statusText);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('API错误响应:', errorText);
+                        throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('API响应数据:', data);
+                    
+                    if (!data.records) {
+                        console.warn('响应中没有records字段:', data);
+                        break;
+                    }
+                    
+                    if (data.records.length === 0) {
+                        console.log('本次请求返回0条记录，结束循环');
+                        break;
+                    }
+                    
+                    console.log(`本次获取到 ${data.records.length} 条记录`);
+                    allRecords.push(...data.records);
+                    
+                    const progressText = `已加载 ${allRecords.length} 条BOM记录 (第${requestCount}次请求)`;
+                    document.getElementById('loadingProgress').textContent = progressText;
+                    console.log(progressText);
+                    
+                    if (data.records.length < take) {
+                        console.log('返回记录数小于请求数，数据已全部获取完毕');
+                        break;
+                    }
+                    skip += take;
+                }
+                
+                pageData.bomData = allRecords;
+                console.log(`BOM数据获取完成，总计 ${allRecords.length} 条记录`);
+                
+                // 打印第一条记录的字段信息，用于调试
+                if (allRecords.length > 0) {
+                    console.log('第一条记录的字段:', Object.keys(allRecords[0].fields));
+                    console.log('第一条记录的完整数据:', allRecords[0]);
+                }
+                
+                showGlobalLoading(false);
+                return pageData.bomData;
+            } catch (error) {
+                console.error('获取BOM数据失败:', error);
+                showGlobalLoading(false);
+                
+                // 在页面上显示错误信息
+                const tbody = document.getElementById('bomTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            数据加载失败：${error.message}
+                            <div class="text-sm mt-2">
+                                <strong>调试信息:</strong><br>
+                                API端点: ${BOM_API_CONFIG.endpoint}<br>
+                                请检查网络连接和API配置是否正确
+                            </div>
+                            <button class="btn btn-primary text-white mt-2" onclick="refreshBomData()">
+                                <i class="fas fa-retry mr-2"></i>重试
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return [];
+            }
+        }
+
+        // 初始化BOM查询表单选项（基于实际可用字段）
+        async function initBomQueryFormOptions() {
+            try {
+                console.log('初始化BOM查询表单选项...');
+                
+                // 获取BOM数据用于提取下拉选项
+                const bomData = await fetchBomData();
+                
+                if (bomData.length === 0) {
+                    console.warn('没有BOM数据，无法初始化查询选项');
+                    return;
+                }
+                
+                console.log('开始提取字段的唯一值...');
+                
+                // 提取唯一值（基于API文档中的实际字段名）
+                const branches = [...new Set(bomData.map(b => b.fields['所属分校']).filter(Boolean))].sort();
+                const types = [...new Set(bomData.map(b => b.fields['类型']).filter(Boolean))].sort();
+                const sizes = [...new Set(bomData.map(b => b.fields['成品尺寸']).filter(Boolean))].sort();
+                const bindings = [...new Set(bomData.map(b => b.fields['装订要求']).filter(Boolean))].sort();
+                const paperTypes = [...new Set(bomData.map(b => b.fields['纸张种类']).filter(Boolean))].sort();
+                const printReqs = [...new Set(bomData.map(b => b.fields['印刷要求']).filter(Boolean))].sort();
+                const paperBrands = [...new Set(bomData.map(b => b.fields['纸张品牌']).filter(Boolean))].sort();
+                
+                console.log('提取到的选项数量:', {
+                    branches: branches.length,
+                    types: types.length,
+                    sizes: sizes.length,
+                    bindings: bindings.length,
+                    paperTypes: paperTypes.length,
+                    printReqs: printReqs.length,
+                    paperBrands: paperBrands.length
+                });
+                
+                // 更新下拉选项
+                updateSelectOptions('bomQueryBranch', branches, '全部分校');
+                updateSelectOptions('bomQueryType', types, '全部类型');
+                updateSelectOptions('bomQuerySize', sizes, '全部尺寸');
+                updateSelectOptions('bomQueryBinding', bindings, '全部装订');
+                updateSelectOptions('bomQueryPaperType', paperTypes, '全部纸张');
+                updateSelectOptions('bomQueryPrint', printReqs, '全部印刷');
+                updateSelectOptions('bomQueryPaperBrand', paperBrands, '全部品牌');
+                
+                console.log('BOM查询表单选项初始化完成');
+                
+            } catch (error) {
+                console.error('初始化BOM查询表单选项失败:', error);
+            }
+        }
+
+        // 渲染BOM数据列表（基于实际字段）
+        async function renderBomData(filteredData = null) {
+            const tbody = document.getElementById('bomTableBody');
+            const loadingRow = document.getElementById('bomLoadingRow');
+            
+            try {
+                let bomData = filteredData;
+                
+                // 如果没有传入筛选结果，则获取全部BOM数据
+                if (!bomData) {
+                    bomData = await fetchBomData();
+                }
+                
+                console.log(`开始渲染 ${bomData.length} 条BOM记录`);
+                
+                // 移除加载状态
+                if (loadingRow) {
+                    loadingRow.remove();
+                }
+                
+                // 清空现有内容
+                tbody.innerHTML = '';
+                
+                if (bomData.length === 0) {
+                    // 显示空状态
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="13" class="empty-state">
+                                <i class="fas fa-database"></i>
+                                <div>暂无符合条件的BOM数据</div>
+                                <div class="text-sm mt-2">请调整查询条件后重试</div>
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById('bomCount').textContent = '共 0 条记录';
+                    updateBomStats(bomData);
+                    return;
+                }
+                
+                // 渲染BOM行（基于API文档中的实际字段）
+                bomData.forEach((bom, index) => {
+                    const fields = bom.fields;
+                    const bomQuantity = fields['单BOM印刷数量'] || 0;
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'bom-row';
+                    
+                    row.innerHTML = `
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${index + 1}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${fields['所属分校'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['类型'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${fields['产品名称'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['成品尺寸'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['装订要求'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['封面/内页'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['纸张种类'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['纸张品牌'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['印刷要求'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fields['工艺要求'] || '-'}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${bomQuantity}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="action-btn view" onclick="viewBomDetail('${bom.id}')" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                // 更新计数和统计
+                document.getElementById('bomCount').textContent = `共 ${bomData.length} 条记录`;
+                updateBomStats(bomData);
+                
+                console.log(`BOM页面渲染完成，显示了 ${bomData.length} 条BOM记录`);
+                
+            } catch (error) {
+                console.error('渲染BOM数据列表失败:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            渲染失败：${error.message}
+                            <button class="btn btn-primary text-white mt-2" onclick="refreshBomData()">
+                                <i class="fas fa-retry mr-2"></i>重试
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // 更新BOM统计数据（基于实际字段）
+        function updateBomStats(bomData) {
+            if (!bomData || bomData.length === 0) {
+                document.getElementById('totalBomCount').textContent = '0';
+                document.getElementById('totalBranchCount').textContent = '0';
+                document.getElementById('totalTypeCount').textContent = '0';
+                document.getElementById('totalConfigCount').textContent = '0';
+                return;
+            }
+            
+            // 总BOM数量
+            document.getElementById('totalBomCount').textContent = bomData.length;
+            
+            // 分校数量
+            const uniqueBranches = new Set(bomData.map(b => b.fields['所属分校']).filter(Boolean));
+            document.getElementById('totalBranchCount').textContent = uniqueBranches.size;
+            
+            // 产品类型数量
+            const uniqueTypes = new Set(bomData.map(b => b.fields['类型']).filter(Boolean));
+            document.getElementById('totalTypeCount').textContent = uniqueTypes.size;
+            
+            // 配置项目数量（统计不同的配置组合）
+            const uniqueConfigs = new Set(bomData.map(b => {
+                const fields = b.fields;
+                return `${fields['成品尺寸']}-${fields['装订要求']}-${fields['纸张种类']}-${fields['印刷要求']}`;
+            }).filter(config => config !== '---'));
+            document.getElementById('totalConfigCount').textContent = uniqueConfigs.size;
+        }
+
+        // 查询BOM数据（基于实际字段）
+        async function searchBomData() {
+            try {
+                // 获取查询条件
+                const conditions = {
+                    branch: document.getElementById('bomQueryBranch').value,
+                    type: document.getElementById('bomQueryType').value,
+                    productName: document.getElementById('bomQueryProductName').value.trim(),
+                    size: document.getElementById('bomQuerySize').value,
+                    binding: document.getElementById('bomQueryBinding').value,
+                    paperType: document.getElementById('bomQueryPaperType').value,
+                    print: document.getElementById('bomQueryPrint').value,
+                    paperBrand: document.getElementById('bomQueryPaperBrand').value
+                };
+                
+                console.log('BOM查询条件:', conditions);
+                
+                // 显示加载状态
+                const tbody = document.getElementById('bomTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" class="table-loading">
+                            <div class="flex flex-col items-center">
+                                <div class="loading mb-2"></div>
+                                <div>正在查询BOM数据...</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                // 获取全部BOM数据
+                const allBomData = pageData.bomData.length > 0 ? pageData.bomData : await fetchBomData();
+                
+                // 执行筛选
+                let filteredBomData = allBomData.filter(bom => {
+                    const fields = bom.fields;
+                    
+                    // 所属分校筛选
+                    if (conditions.branch && fields['所属分校'] !== conditions.branch) {
+                        return false;
+                    }
+                    
+                    // 类型筛选
+                    if (conditions.type && fields['类型'] !== conditions.type) {
+                        return false;
+                    }
+                    
+                    // 产品名称筛选
+                    if (conditions.productName && !fields['产品名称']?.includes(conditions.productName)) {
+                        return false;
+                    }
+                    
+                    // 成品尺寸筛选
+                    if (conditions.size && fields['成品尺寸'] !== conditions.size) {
+                        return false;
+                    }
+                    
+                    // 装订要求筛选
+                    if (conditions.binding && fields['装订要求'] !== conditions.binding) {
+                        return false;
+                    }
+                    
+                    // 纸张种类筛选
+                    if (conditions.paperType && fields['纸张种类'] !== conditions.paperType) {
+                        return false;
+                    }
+                    
+                    // 印刷要求筛选
+                    if (conditions.print && fields['印刷要求'] !== conditions.print) {
+                        return false;
+                    }
+                    
+                    // 纸张品牌筛选
+                    if (conditions.paperBrand && fields['纸张品牌'] !== conditions.paperBrand) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                console.log(`BOM查询结果：从 ${allBomData.length} 条记录中筛选出 ${filteredBomData.length} 条记录`);
+                
+                // 渲染筛选结果
+                await renderBomData(filteredBomData);
+                
+            } catch (error) {
+                console.error('查询BOM数据失败:', error);
+                alert('查询失败: ' + error.message);
+            }
+        }
+
+        // 重置BOM查询表单
+        function resetBomQueryForm() {
+            document.getElementById('bomQueryBranch').value = '';
+            document.getElementById('bomQueryType').value = '';
+            document.getElementById('bomQueryProductName').value = '';
+            document.getElementById('bomQuerySize').value = '';
+            document.getElementById('bomQueryBinding').value = '';
+            document.getElementById('bomQueryPaperType').value = '';
+            document.getElementById('bomQueryPrint').value = '';
+            document.getElementById('bomQueryPaperBrand').value = '';
+            
+            // 重新加载全部数据
+            renderBomData();
+        }
+
+        // 刷新BOM数据
+        async function refreshBomData() {
+            const tbody = document.getElementById('bomTableBody');
+            tbody.innerHTML = `
+                <tr id="bomLoadingRow">
+                    <td colspan="13" class="table-loading">
+                        <div class="flex flex-col items-center">
+                            <div class="loading mb-2"></div>
+                            <div>正在刷新BOM数据...</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // 清空缓存，重新获取数据
+            pageData.bomData = [];
+            await renderBomData();
+        }
+
+        // 查看BOM详情
+        function viewBomDetail(bomId) {
+            const bomRecord = pageData.bomData.find(b => b.id === bomId);
+            if (bomRecord) {
+                const fields = bomRecord.fields;
+                let detailInfo = '产品BOM详细信息:\n\n';
+                
+                // 遍历所有字段
+                Object.keys(fields).forEach(key => {
+                    if (fields[key]) {
+                        detailInfo += `${key}: ${fields[key]}\n`;
+                    }
+                });
+                
+                alert(detailInfo);
+            } else {
+                alert(`BOM记录未找到 (ID: ${bomId})`);
+            }
+        }
+
+        // 导出BOM数据
+        function exportBomData() {
+            alert('导出BOM Excel功能开发中...');
+            // TODO: 实现导出功能
+        }
+
+        // 工具函数
+        function showGlobalLoading(show) {
+            const el = document.getElementById('globalLoading');
+            if (show) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function updateSelectOptions(selectIdOrEl, options, placeholder = "请选择") {
+            const select = typeof selectIdOrEl === 'string' ? document.getElementById(selectIdOrEl) : selectIdOrEl;
+            if (!select) return;
+
+            const currentValue = select.value;
+            select.innerHTML = `<option value="">${placeholder}</option>`;
+            
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+
+            if (currentValue && options.includes(currentValue)) {
+                select.value = currentValue;
+            } else {
+                select.value = "";
+            }
+            select.disabled = options.length === 0;
+        }
+
+        // 页面导航切换
+        document.addEventListener('DOMContentLoaded', () => {
+            // 导航切换事件
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetPage = item.getAttribute('data-page');
+                    
+                    // 更新导航激活状态
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // 显示对应页面内容
+                    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+                    const targetContent = document.getElementById(targetPage + '-content');
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                    }
+                    
+                    // 根据页面加载对应数据
+                    if (targetPage === 'products') {
+                        initBomQueryFormOptions().then(() => {
+                            renderBomData();
+                        });
+                    }
+                });
+            });
+
+            // 初始化产品BOM页面（默认激活页面）
+            console.log('页面加载完成，初始化产品BOM页面...');
+            initBomQueryFormOptions().then(() => {
+                renderBomData();
+            });
+        });
+    </script>
+</body>
+</html>
