@@ -53,8 +53,13 @@ export default function Distribution() {
   )
 
   const myDistributions = useMemo(
-    () => distributions.filter((d) => myResponsibleCampuses.includes(d.fields['校区名称'])),
-    [distributions, myResponsibleCampuses]
+    () => distributions.filter((d) => {
+      const matchBranch = !branch || d.fields['所属分校'] === branch
+      // 管理员或无指定负责校区时，显示本分校所有分发记录
+      if (myResponsibleCampuses.length === 0) return matchBranch
+      return matchBranch && myResponsibleCampuses.includes(d.fields['校区名称'])
+    }),
+    [distributions, myResponsibleCampuses, branch]
   )
 
   const branchCampuses = useMemo(
@@ -185,7 +190,7 @@ export default function Distribution() {
     { key: '校区名称', title: '校区' },
     { key: '所属分校', title: '所属分校' },
     { key: '分配数量', title: '数量' },
-    { key: '状态', title: '状态', render: (v) => <Badge status={v === '已确认' ? 'confirmed' : 'pending'} /> },
+    { key: '状态', title: '状态', render: (v) => <Badge status={v === '已确认' ? 'confirmed' : 'pending_confirm'} /> },
     {
       key: '_action',
       title: '操作',

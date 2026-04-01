@@ -16,7 +16,7 @@ import Roles from './pages/admin/Roles.jsx'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/print-management">
       <AuthProvider>
         <CacheProvider>
           <Routes>

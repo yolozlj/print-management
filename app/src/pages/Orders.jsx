@@ -11,8 +11,14 @@ import Table from '../components/ui/Table.jsx'
 
 const STATUS_KEY = {
   '待审核': 'pending',
+  '已提交': 'pending',
   '已审核': 'approved',
   '已驳回': 'rejected',
+}
+
+// 将"已提交"规范化为"待审核"
+function normalizeStatus(status) {
+  return status === '已提交' ? '待审核' : status
 }
 
 const TABS = ['全部', '待审核', '已审核', '已驳回']
@@ -44,7 +50,8 @@ export default function Orders() {
       orders
         .filter((o) => {
           const matchBranch = !branch || o.fields['所属分校'] === branch
-          const matchStatus = activeTab === '全部' || o.fields['订单状态'] === activeTab
+          const status = normalizeStatus(o.fields['订单状态'])
+          const matchStatus = activeTab === '全部' || status === activeTab
           return matchBranch && matchStatus
         })
         .sort((a, b) =>
@@ -161,7 +168,7 @@ export default function Orders() {
                     >
                       {isExpanded ? '收起' : '详情'}
                     </Button>
-                    {permissions?.approve_orders && f['订单状态'] === '待审核' && (
+                    {permissions?.approve_orders && (f['订单状态'] === '待审核' || f['订单状态'] === '已提交') && (
                       <>
                         <Button size="sm" onClick={() => approve(rec)} loading={actionLoading}>
                           通过

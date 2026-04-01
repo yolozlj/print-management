@@ -73,5 +73,9 @@ export function isBomDuplicate(bomRecords, fields) {
  */
 export function isContractActive(contract, today = new Date().toISOString().slice(0, 10)) {
   const { '有效期开始': start, '有效期结束': end } = contract.fields
-  return !!start && !!end && start <= today && end >= today
+  if (!start || !end) return false
+  // 兼容 ISO 时间戳格式（如 2026-03-01T00:00:00.000Z），统一取前10位比较
+  const s = String(start).slice(0, 10)
+  const e = String(end).slice(0, 10)
+  return s <= today && e >= today
 }

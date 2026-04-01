@@ -130,9 +130,9 @@ export default function Contracts() {
     }
   }
 
-  function openAddPrice(contractName) {
+  function openAddPrice(contractCode) {
     setEditingPrice(null)
-    setPriceForm({ ...emptyPrice, 合同名称: contractName })
+    setPriceForm({ ...emptyPrice, 合同名称: contractCode })
     setError('')
     setPriceModal(true)
   }
@@ -228,7 +228,7 @@ export default function Contracts() {
             const f = rec.fields
             const active = isContractActive(rec)
             const expanded = expandedId === rec.id
-            const detail = priceRows.filter((p) => p.fields['合同名称'] === f['合同名称'])
+            const detail = priceRows.filter((p) => p.fields['合同名称'] === f['合同编号'])
 
             return (
               <div key={rec.id} className="border-b border-gray-50 last:border-0">
@@ -244,7 +244,7 @@ export default function Contracts() {
                   </svg>
                   <span className="w-28 text-xs text-gray-500">{f['合同编号']}</span>
                   <span className="flex-1 text-sm font-medium text-gray-900">{f['合同名称']}</span>
-                  <span className="w-52 text-xs text-gray-500">{f['有效期开始']} ~ {f['有效期结束']}</span>
+                  <span className="w-52 text-xs text-gray-500">{String(f['有效期开始'] || '').slice(0, 10)} ~ {String(f['有效期结束'] || '').slice(0, 10)}</span>
                   <span className="w-32 text-xs text-gray-500">{f['适用分校']}</span>
                   <Badge status={active ? 'active' : 'rejected'} />
                   <Button
@@ -260,7 +260,7 @@ export default function Contracts() {
                   <div className="border-t border-gray-50 bg-gray-50 px-5 py-4">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-xs font-medium text-gray-500">价格明细（{detail.length} 条）</span>
-                      <Button size="sm" onClick={() => openAddPrice(f['合同名称'])}>新增价格行</Button>
+                      <Button size="sm" onClick={() => openAddPrice(f['合同编号'])}>新增价格行</Button>
                     </div>
                     <Table
                       columns={priceColumns}

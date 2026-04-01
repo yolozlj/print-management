@@ -9,6 +9,7 @@ import { AlertCircle, CheckCircle2, FileCheck, PackageCheck } from 'lucide-react
 
 const STATUS_KEY = {
   '待审核': 'pending',
+  '已提交': 'pending',
   '已审核': 'approved',
   '已驳回': 'rejected',
 }
@@ -56,7 +57,7 @@ export default function Dashboard() {
           ? orders.filter((o) => o.fields['所属分校'] === branch)
           : orders
 
-        const pending = myOrders.filter((o) => o.fields['订单状态'] === '待审核').length
+        const pending = myOrders.filter((o) => o.fields['订单状态'] === '待审核' || o.fields['订单状态'] === '已提交').length
         const approvedThisMonth = myOrders.filter(
           (o) =>
             o.fields['订单状态'] === '已审核' &&

@@ -200,6 +200,7 @@ export default function CreateOrder() {
       const now = new Date().toISOString()
       const productName = mode === 'bom' ? selectedBomProduct : specFixed['产品名称']
 
+      // mainContract 现在是合同编号，存入"合同名称"字段（历史命名，实际存合同编号）
       await createRecord(TABLES.ORDER_MAIN, {
         订单编号: orderId,
         合同名称: mainContract,
@@ -286,6 +287,33 @@ export default function CreateOrder() {
   return (
     <div>
       <h1 className="mb-6 text-lg font-semibold text-gray-900">创建订单</h1>
+
+      {/* Quantity + contracts — 前置，让用户先选数量和合同 */}
+      <div className="mb-6 rounded-xl border border-gray-100 bg-white p-5">
+        <div className="grid grid-cols-3 gap-3">
+          <Input
+            label="印刷数量 *"
+            type="number"
+            value={orderQty}
+            onChange={(e) => setOrderQty(e.target.value)}
+            placeholder="输入数量"
+          />
+          <Select
+            label="主合同 *"
+            value={mainContract}
+            onChange={(e) => setMainContract(e.target.value)}
+            options={validContracts.map((c) => ({ value: c.fields['合同编号'], label: `${c.fields['合同名称']}（${c.fields['合同编号']}）` }))}
+            placeholder="选择有效合同"
+          />
+          <Select
+            label="对比合同（可选）"
+            value={compareContract}
+            onChange={(e) => setCompareContract(e.target.value)}
+            options={contracts.map((c) => ({ value: c.fields['合同编号'], label: `${c.fields['合同名称']}（${c.fields['合同编号']}）` }))}
+            placeholder="不对比"
+          />
+        </div>
+      </div>
 
       {/* Mode selector */}
       <div className="mb-6 flex gap-6">
@@ -427,33 +455,6 @@ export default function CreateOrder() {
           </div>
         </div>
       )}
-
-      {/* Quantity + contracts */}
-      <div className="mb-6 rounded-xl border border-gray-100 bg-white p-5">
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            label="印刷数量 *"
-            type="number"
-            value={orderQty}
-            onChange={(e) => setOrderQty(e.target.value)}
-            placeholder="输入数量"
-          />
-          <Select
-            label="主合同 *"
-            value={mainContract}
-            onChange={(e) => setMainContract(e.target.value)}
-            options={validContracts.map((c) => ({ value: c.fields['合同名称'], label: c.fields['合同名称'] }))}
-            placeholder="选择有效合同"
-          />
-          <Select
-            label="对比合同（可选）"
-            value={compareContract}
-            onChange={(e) => setCompareContract(e.target.value)}
-            options={contracts.map((c) => ({ value: c.fields['合同名称'], label: c.fields['合同名称'] }))}
-            placeholder="不对比"
-          />
-        </div>
-      </div>
 
       {/* Price preview */}
       {mainResult && (
