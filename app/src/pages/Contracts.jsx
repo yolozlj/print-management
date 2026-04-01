@@ -10,7 +10,7 @@ import Badge from '../components/ui/Badge.jsx'
 import { isContractActive } from '../utils/price.js'
 
 const emptyContract = { 合同编号: '', 合同名称: '', 有效期开始: '', 有效期结束: '', 适用分校: '', 备注: '' }
-const emptyPrice = { 合同名称: '', 所属分校: '', 类型: '', 成品尺寸: '', 装订要求: '', '封面/内页': '', 纸张种类: '', 纸张品牌: '', 印刷要求: '', 工艺要求: '', 数量起: '', 数量止: '', 印刷单价: '' }
+const emptyPrice = { 合同编号: '', 类型: '', 成品尺寸: '', 装订要求: '', '封面/内页': '', 纸张种类: '', 纸张品牌: '', 印刷要求: '', 工艺要求: '', 数量起: '', 数量止: '', 印刷单价: '' }
 
 function ContractForm({ form, onChange }) {
   const fields = [
@@ -38,7 +38,6 @@ function ContractForm({ form, onChange }) {
 
 function PriceForm({ form, onChange }) {
   const fields = [
-    { key: '所属分校', label: '所属分校 *', placeholder: '' },
     { key: '类型', label: '类型 *', placeholder: '如 教材' },
     { key: '成品尺寸', label: '成品尺寸 *', placeholder: '如 A4' },
     { key: '装订要求', label: '装订要求 *', placeholder: '如 平装' },
@@ -132,7 +131,7 @@ export default function Contracts() {
 
   function openAddPrice(contractCode) {
     setEditingPrice(null)
-    setPriceForm({ ...emptyPrice, 合同名称: contractCode })
+    setPriceForm({ ...emptyPrice, 合同编号: contractCode })
     setError('')
     setPriceModal(true)
   }
@@ -187,7 +186,6 @@ export default function Contracts() {
   }
 
   const priceColumns = [
-    { key: '所属分校', title: '所属分校' },
     { key: '类型', title: '类型' },
     { key: '成品尺寸', title: '成品尺寸' },
     { key: '装订要求', title: '装订要求' },
@@ -228,7 +226,7 @@ export default function Contracts() {
             const f = rec.fields
             const active = isContractActive(rec)
             const expanded = expandedId === rec.id
-            const detail = priceRows.filter((p) => p.fields['合同名称'] === f['合同编号'])
+            const detail = priceRows.filter((p) => p.fields['合同编号'] === f['合同编号'])
 
             return (
               <div key={rec.id} className="border-b border-gray-50 last:border-0">
