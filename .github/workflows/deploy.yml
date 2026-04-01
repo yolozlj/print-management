@@ -25,6 +25,14 @@ jobs:
 
       - run: npm ci
 
+      - name: 检查 Secrets 是否存在
+        run: |
+          echo "BASE_URL 长度: ${#VITE_TEABLE_BASE_URL}"
+          echo "TOKEN 长度: ${#VITE_TEABLE_TOKEN}"
+        env:
+          VITE_TEABLE_BASE_URL: ${{ secrets.VITE_TEABLE_BASE_URL }}
+          VITE_TEABLE_TOKEN: ${{ secrets.VITE_TEABLE_TOKEN }}
+
       - run: npm run build
         env:
           VITE_TEABLE_BASE_URL: ${{ secrets.VITE_TEABLE_BASE_URL }}
