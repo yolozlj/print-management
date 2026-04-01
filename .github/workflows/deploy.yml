@@ -25,14 +25,6 @@ jobs:
 
       - run: npm ci
 
-      - name: 检查 Secrets 内容
-        run: |
-          echo "BASE_URL 前20字符: ${VITE_TEABLE_BASE_URL:0:20}"
-          echo "TOKEN 前20字符: ${VITE_TEABLE_TOKEN:0:20}"
-        env:
-          VITE_TEABLE_BASE_URL: ${{ secrets.VITE_TEABLE_BASE_URL }}
-          VITE_TEABLE_TOKEN: ${{ secrets.VITE_TEABLE_TOKEN }}
-
       - run: npm run build
         env:
           VITE_TEABLE_BASE_URL: ${{ secrets.VITE_TEABLE_BASE_URL }}
