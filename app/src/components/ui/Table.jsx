@@ -22,7 +22,7 @@ export default function Table({
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`whitespace-nowrap px-4 ${compact ? 'py-2' : 'py-3'} text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}
+                className={`whitespace-nowrap px-4 ${compact ? 'py-2' : 'py-3'} text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 ${col.colClassName ?? ''} ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}
               >
                 {col.title}
               </th>
@@ -56,7 +56,7 @@ export default function Table({
                 className="border-b border-gray-50 transition-colors duration-100 last:border-0 hover:bg-gray-50/70"
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={`px-4 ${compact ? 'py-1.5' : 'py-3'} text-gray-700 ${col.tdClassName ?? ''} ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}>
+                  <td key={col.key} className={`whitespace-nowrap px-4 ${compact ? 'py-1.5' : 'py-3'} text-gray-700 ${col.colClassName ?? ''} ${col.tdClassName ?? ''} ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}>
                     {col.render ? col.render(row[col.key], row) : (row[col.key] ?? '-')}
                   </td>
                 ))}

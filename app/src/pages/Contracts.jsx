@@ -295,18 +295,19 @@ export default function Contracts() {
   }
 
   const priceColumns = [
-    { key: '类型', title: '类型' },
-    { key: '成品尺寸', title: '成品尺寸' },
-    { key: '装订要求', title: '装订要求' },
-    { key: '封面/内页', title: '封面/内页' },
-    { key: '纸张种类', title: '纸张种类' },
-    { key: '印刷要求', title: '印刷要求' },
-    { key: '数量起', title: '数量起' },
-    { key: '数量止', title: '数量止' },
-    { key: '印刷单价', title: '单价(元)' },
+    { key: '类型', title: '类型', colClassName: 'w-14' },
+    { key: '成品尺寸', title: '成品尺寸', colClassName: 'w-16' },
+    { key: '装订要求', title: '装订要求', colClassName: 'w-16' },
+    { key: '封面/内页', title: '封面/内页', colClassName: 'w-16' },
+    { key: '纸张种类', title: '纸张种类', colClassName: 'w-20' },
+    { key: '印刷要求', title: '印刷要求', colClassName: 'w-20' },
+    { key: '数量起', title: '数量起', colClassName: 'w-14' },
+    { key: '数量止', title: '数量止', colClassName: 'w-14' },
+    { key: '印刷单价', title: '单价(元)', colClassName: 'w-16' },
     {
       key: '_actions',
       title: '操作',
+      colClassName: 'w-20',
       render: (_, row) => (
         <div className="flex gap-2 whitespace-nowrap">
           <Button size="sm" variant="secondary" onClick={() => openEditPrice(row._record)}>编辑</Button>
@@ -368,24 +369,19 @@ export default function Contracts() {
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-xs font-medium text-gray-500">价格明细（{detail.length} 条）</span>
                       <div className="flex gap-2">
-                        <button
-                          className="text-xs text-gray-500 underline underline-offset-2 hover:text-gray-700"
-                          onClick={downloadPriceTemplate}
-                        >
+                        <Button size="sm" variant="secondary" onClick={downloadPriceTemplate}>
+                          <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                           下载模板
-                        </button>
-                        <label className="cursor-pointer">
-                          <input
-                            type="file"
-                            accept=".xlsx,.xls"
-                            className="hidden"
-                            onChange={(e) => handlePriceFileSelect(e, f['合同编号'])}
-                          />
-                          <span className="inline-flex cursor-pointer items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                            批量导入
-                          </span>
+                        </Button>
+                        <label className="inline-flex h-8 cursor-pointer select-none items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-700 transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 active:scale-[0.97]">
+                          <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l4-4m0 0l4 4m-4-4v12" /></svg>
+                          批量导入
+                          <input type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => handlePriceFileSelect(e, f['合同编号'])} />
                         </label>
-                        <Button size="sm" onClick={() => openAddPrice(f['合同编号'])}>新增价格行</Button>
+                        <Button size="sm" onClick={() => openAddPrice(f['合同编号'])}>
+                          <svg className="h-3.5 w-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                          新增价格行
+                        </Button>
                       </div>
                     </div>
                     <Table
