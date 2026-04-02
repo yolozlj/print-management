@@ -9,6 +9,7 @@ const STATUS_MAP = {
   rejected:         { label: '已驳回', className: 'bg-red-50 text-red-600 ring-red-200/80' },
   confirmed:        { label: '已确认', className: 'bg-green-50 text-green-700 ring-green-200/80' },
   active:           { label: '已激活', className: 'bg-gray-900 text-white ring-transparent' },
+  expired:          { label: '已过期', className: 'bg-gray-100 text-gray-400 ring-gray-200/80' },
 }
 
 export default function Badge({ status, className = '' }) {

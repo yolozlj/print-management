@@ -79,7 +79,7 @@ export default function Contracts() {
   const [editingContract, setEditingContract] = useState(null)
   const [contractForm, setContractForm] = useState(emptyContract)
   const [contractSaving, setContractSaving] = useState(false)
-  const [parsing, setParsing] = useState(false)
+  const [parsingProgress, setParsingProgress] = useState(null) // null | { message, page?, total? }
   const [parsedPrices, setParsedPrices] = useState([])
 
   // Price modal
@@ -106,10 +106,10 @@ export default function Contracts() {
     const file = e.target.files?.[0]
     if (!file) return
     e.target.value = ''
-    setParsing(true)
+    setParsingProgress({ message: '准备中…' })
     setError('')
     try {
-      const result = await parseContractFile(file)
+      const result = await parseContractFile(file, (p) => setParsingProgress(p))
       setContractForm((prev) => {
         const merged = { ...prev }
         Object.entries(result.contract || {}).forEach(([k, v]) => {
@@ -123,7 +123,7 @@ export default function Contracts() {
     } catch (err) {
       setError(err.message)
     } finally {
-      setParsing(false)
+      setParsingProgress(null)
     }
   }
 
@@ -354,7 +354,7 @@ export default function Contracts() {
                   <span className="flex-1 text-sm font-medium text-gray-900">{f['合同名称']}</span>
                   <span className="w-52 text-xs text-gray-500">{String(f['有效期开始'] || '').slice(0, 10)} ~ {String(f['有效期结束'] || '').slice(0, 10)}</span>
                   <span className="w-32 text-xs text-gray-500">{f['适用分校']}</span>
-                  <Badge status={active ? 'active' : 'rejected'} />
+                  <Badge status={active ? 'active' : 'expired'} />
                   <Button
                     size="sm"
                     variant="secondary"
@@ -417,24 +417,50 @@ export default function Contracts() {
         )}
         {!editingContract && (
           <div className="mb-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
-            <div className="flex items-center justify-between">
+            {parsingProgress ? (
               <div>
-                <p className="text-xs font-medium text-gray-700">上传合同图片自动解析</p>
-                <p className="mt-0.5 text-[11px] text-gray-400">支持 JPG / PNG / WEBP，解析结果会自动填入表单</p>
+                <div className="flex items-center gap-2">
+                  <svg className="h-3.5 w-3.5 shrink-0 animate-spin text-gray-500" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  <span className="text-xs font-medium text-gray-700">{parsingProgress.message}</span>
+                </div>
+                {parsingProgress.total > 1 && (
+                  <div className="mt-2">
+                    <div className="mb-1 flex justify-between text-[11px] text-gray-400">
+                      <span>进度</span>
+                      <span>{parsingProgress.page}/{parsingProgress.total} 页</span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-full rounded-full bg-gray-700 transition-all duration-300"
+                        style={{ width: `${(parsingProgress.page / parsingProgress.total) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.webp"
-                  className="hidden"
-                  onChange={handleContractFileParse}
-                />
-                <span className={`inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 ${parsing ? 'opacity-50 pointer-events-none' : ''}`}>
-                  {parsing ? '解析中…' : '选择文件'}
-                </span>
-              </label>
-            </div>
-            {parsedPrices.length > 0 && (
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-700">上传合同自动解析</p>
+                  <p className="mt-0.5 text-[11px] text-gray-400">支持 PDF / JPG / PNG / WEBP，扫描版 PDF 自动 OCR 识别</p>
+                </div>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    onChange={handleContractFileParse}
+                  />
+                  <span className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                    选择文件
+                  </span>
+                </label>
+              </div>
+            )}
+            {!parsingProgress && parsedPrices.length > 0 && (
               <p className="mt-2 text-[11px] text-blue-600">
                 已识别 {parsedPrices.length} 条价格明细，保存合同后可一键导入
               </p>
