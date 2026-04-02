@@ -4,6 +4,7 @@
  * data: array of objects
  * loading: 展示 skeleton 行
  * emptyText: 无数据时显示
+ * compact: 紧凑模式，减少行高（默认 false）
  */
 export default function Table({
   columns = [],
@@ -43,7 +44,7 @@ export default function Table({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-16 text-center text-sm text-gray-400"
+                className={`px-4 ${compact ? 'py-8' : 'py-16'} text-center text-sm text-gray-400`}
               >
                 {emptyText}
               </td>
