@@ -30,12 +30,10 @@ export default function Register() {
       .catch(() => setError('校区数据加载失败，分校/校区可跳过直接提交'))
   }, [])
 
-  // 从校区记录中提取唯一分校列表
   const branchOptions = [...new Set(
     campusRecords.map((r) => r.fields['所属分校']).filter(Boolean)
   )].map((b) => ({ value: b, label: b }))
 
-  // 按选中分校过滤校区列表（分校为空时显示全部）
   const campusOptions = campusRecords
     .filter((r) => (!form.branch || r.fields['所属分校'] === form.branch) && r.fields['校区名称'])
     .map((r) => ({ value: r.fields['校区名称'], label: r.fields['校区名称'] }))

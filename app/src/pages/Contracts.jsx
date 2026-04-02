@@ -170,9 +170,12 @@ export default function Contracts() {
           const failed = results.filter((r) => r.status === 'rejected').length
           if (failed > 0) {
             setError(`合同已保存，但 ${parsedPrices.length} 条价格明细中有 ${failed} 条导入失败`)
-            // 不关闭 Modal，让用户看到错误
+            await Promise.all([
+              getTableData(TABLES.PRICE_BASE, true).then(setPriceRows),
+              getTableData(TABLES.CONTRACT, true).then(setContracts),
+            ])
             invalidate(TABLES.PRICE_BASE)
-            setPriceRows(await getTableData(TABLES.PRICE_BASE, true))
+            invalidate(TABLES.CONTRACT)
             return
           }
           invalidate(TABLES.PRICE_BASE)
@@ -261,17 +264,29 @@ export default function Contracts() {
     }
   }
 
+  function closeImportModal() {
+    setPriceImportModal(false)
+    setPriceImportRows([])
+    setImportTargetContract('')
+  }
+
   async function submitPriceImport() {
     setPriceImporting(true)
     setError('')
     try {
-      for (const row of priceImportRows) {
-        await createRecord(TABLES.PRICE_BASE, { ...row, 合同编号: importTargetContract })
-      }
+      const results = await Promise.allSettled(
+        priceImportRows.map((row) =>
+          createRecord(TABLES.PRICE_BASE, { ...row, 合同编号: importTargetContract })
+        )
+      )
       invalidate(TABLES.PRICE_BASE)
       setPriceRows(await getTableData(TABLES.PRICE_BASE, true))
-      setPriceImportModal(false)
-      setPriceImportRows([])
+      const failed = results.filter((r) => r.status === 'rejected').length
+      if (failed > 0) {
+        setError(`${priceImportRows.length} 条中有 ${failed} 条导入失败`)
+      } else {
+        closeImportModal()
+      }
     } catch {
       setError('批量导入失败，请重试')
     } finally {
@@ -293,10 +308,10 @@ export default function Contracts() {
       key: '_actions',
       title: '操作',
       render: (_, row) => (
-        <div className="whitespace-nowrap"><div className="flex gap-2">
+        <div className="flex gap-2 whitespace-nowrap">
           <Button size="sm" variant="secondary" onClick={() => openEditPrice(row._record)}>编辑</Button>
           <Button size="sm" variant="danger" onClick={() => handleDeletePrice(row._record.id)}>删除</Button>
-        </div></div>
+        </div>
       ),
     },
   ]
@@ -459,11 +474,11 @@ export default function Contracts() {
       {/* 价格行批量导入预览 Modal */}
       <Modal
         open={priceImportModal}
-        onClose={() => { setPriceImportModal(false); setPriceImportRows([]) }}
+        onClose={closeImportModal}
         title={`批量导入价格行（合同：${importTargetContract}）`}
         footer={
           <>
-            <Button variant="secondary" onClick={() => { setPriceImportModal(false); setPriceImportRows([]) }}>取消</Button>
+            <Button variant="secondary" onClick={closeImportModal}>取消</Button>
             <Button loading={priceImporting} onClick={submitPriceImport}>
               确认导入（{priceImportRows.length} 条）
             </Button>

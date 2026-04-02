@@ -1,5 +1,22 @@
 import * as XLSX from 'xlsx'
 
+function parseXlsxFile(file, transform) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' })
+        const ws = wb.Sheets[wb.SheetNames[0]]
+        resolve(transform(XLSX.utils.sheet_to_json(ws)))
+      } catch (err) {
+        reject(new Error(err.message || '文件解析失败，请检查格式'))
+      }
+    }
+    reader.onerror = () => reject(new Error('文件读取失败'))
+    reader.readAsArrayBuffer(file)
+  })
+}
+
 export function exportDistribution(rows, filename = '分发清单') {
   const ws = XLSX.utils.json_to_sheet(rows)
   const wb = XLSX.utils.book_new()
@@ -8,26 +25,14 @@ export function exportDistribution(rows, filename = '分发清单') {
 }
 
 export function parseDistributionImport(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const wb = XLSX.read(e.target.result, { type: 'array' })
-        const ws = wb.Sheets[wb.SheetNames[0]]
-        const data = XLSX.utils.sheet_to_json(ws)
-        const rows = data
-          .map((r) => ({
-            校区名称: String(r['校区名称'] || r['campus'] || '').trim(),
-            分配数量: Number(r['分配数量'] || r['quantity'] || 0),
-          }))
-          .filter((r) => r['校区名称'] && r['分配数量'] > 0)
-        resolve(rows)
-      } catch (err) {
-        reject(new Error('文件解析失败，请检查格式'))
-      }
-    }
-    reader.onerror = () => reject(new Error('文件读取失败'))
-    reader.readAsArrayBuffer(file)
+  return parseXlsxFile(file, (data) => {
+    const rows = data
+      .map((r) => ({
+        校区名称: String(r['校区名称'] || r['campus'] || '').trim(),
+        分配数量: Number(r['分配数量'] || r['quantity'] || 0),
+      }))
+      .filter((r) => r['校区名称'] && r['分配数量'] > 0)
+    return rows
   })
 }
 
@@ -40,36 +45,24 @@ export function downloadDistributionTemplate(campuses) {
 }
 
 export function parsePriceImport(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const wb = XLSX.read(e.target.result, { type: 'array' })
-        const ws = wb.Sheets[wb.SheetNames[0]]
-        const data = XLSX.utils.sheet_to_json(ws)
-        const rows = data
-          .map((r) => ({
-            类型: String(r['类型'] || '').trim(),
-            成品尺寸: String(r['成品尺寸'] || '').trim(),
-            装订要求: String(r['装订要求'] || '').trim(),
-            '封面/内页': String(r['封面/内页'] || '').trim(),
-            纸张种类: String(r['纸张种类'] || '').trim(),
-            纸张品牌: String(r['纸张品牌'] || '').trim(),
-            印刷要求: String(r['印刷要求'] || '').trim(),
-            工艺要求: String(r['工艺要求'] || '').trim(),
-            数量起: String(r['数量起'] || '').trim(),
-            数量止: String(r['数量止'] || '').trim(),
-            印刷单价: String(r['印刷单价'] || '').trim(),
-          }))
-          .filter((r) => r['类型'] && r['印刷单价'])
-        if (rows.length === 0) throw new Error('未找到有效数据行，请检查表头名称')
-        resolve(rows)
-      } catch (err) {
-        reject(new Error(err.message || '文件解析失败，请检查格式'))
-      }
-    }
-    reader.onerror = () => reject(new Error('文件读取失败'))
-    reader.readAsArrayBuffer(file)
+  return parseXlsxFile(file, (data) => {
+    const rows = data
+      .map((r) => ({
+        类型: String(r['类型'] || '').trim(),
+        成品尺寸: String(r['成品尺寸'] || '').trim(),
+        装订要求: String(r['装订要求'] || '').trim(),
+        '封面/内页': String(r['封面/内页'] || '').trim(),
+        纸张种类: String(r['纸张种类'] || '').trim(),
+        纸张品牌: String(r['纸张品牌'] || '').trim(),
+        印刷要求: String(r['印刷要求'] || '').trim(),
+        工艺要求: String(r['工艺要求'] || '').trim(),
+        数量起: String(r['数量起'] || '').trim(),
+        数量止: String(r['数量止'] || '').trim(),
+        印刷单价: String(r['印刷单价'] || '').trim(),
+      }))
+      .filter((r) => r['类型'] && r['印刷单价'])
+    if (rows.length === 0) throw new Error('未找到有效数据行，请检查表头名称')
+    return rows
   })
 }
 

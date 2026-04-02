@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useCache } from '../store/CacheContext.jsx'
 import { useAuth } from '../store/AuthContext.jsx'
 import { TABLES } from '../api/tables.js'
@@ -153,13 +153,11 @@ export default function Distribution() {
   }
 
   async function handleExport() {
-    const campusMap = {}
-    campuses.forEach((c) => { campusMap[c.fields['校区名称']] = c.fields })
     const rows = distributions
       .filter((d) => !branch || d.fields['所属分校'] === branch)
       .map((d) => {
         const f = d.fields
-        const cm = campusMap[f['校区名称']] || {}
+        const cm = campusInfoMap[f['校区名称']] || {}
         return {
           订单编号: f['订单编号'],
           分发单号: f['分发单号'],
@@ -269,8 +267,8 @@ export default function Distribution() {
                     const isOpen = expandedDistId === rec.id
                     const campus = campusInfoMap[f['校区名称']] || {}
                     return (
-                      <>
-                        <tr key={rec.id} className="border-b border-gray-50 transition-colors hover:bg-gray-50/70">
+                      <React.Fragment key={rec.id}>
+                        <tr className="border-b border-gray-50 transition-colors hover:bg-gray-50/70">
                           <td className="px-4 py-3 font-mono text-xs text-gray-500">{f['分发单号']}</td>
                           <td className="px-4 py-3 text-xs text-gray-500">{f['订单编号']}</td>
                           <td className="px-4 py-3 text-gray-700">{f['校区名称']}</td>
@@ -304,7 +302,7 @@ export default function Distribution() {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </React.Fragment>
                     )
                   })}
                 </tbody>
