@@ -27,6 +27,7 @@ export default function Distribution() {
   const [distributions, setDistributions] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const [expandedDistId, setExpandedDistId] = useState(null)
   const [panelOrder, setPanelOrder] = useState(null)
   const [panelMode, setPanelMode] = useState('manual')
   const [manualAllocs, setManualAllocs] = useState({})
@@ -60,6 +61,11 @@ export default function Distribution() {
       return matchBranch && myResponsibleCampuses.includes(d.fields['校区名称'])
     }),
     [distributions, myResponsibleCampuses, branch]
+  )
+
+  const campusInfoMap = useMemo(
+    () => Object.fromEntries(campuses.map((c) => [c.fields['校区名称'], c.fields])),
+    [campuses]
   )
 
   const branchCampuses = useMemo(
@@ -243,12 +249,68 @@ export default function Distribution() {
 
       {activeTab === '我的分发' && (
         <div className="rounded-xl border border-gray-100 bg-white">
-          <Table
-            columns={myDistColumns}
-            data={myDistributions.map((r) => ({ ...r.fields, _record: r }))}
-            loading={loading}
-            emptyText="暂无分发记录"
-          />
+          {loading ? (
+            <p className="py-12 text-center text-sm text-gray-400">加载中…</p>
+          ) : myDistributions.length === 0 ? (
+            <p className="py-12 text-center text-sm text-gray-400">暂无分发记录</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {['分发单号', '订单编号', '校区', '所属分校', '数量', '状态', '操作'].map((h) => (
+                      <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {myDistributions.map((rec) => {
+                    const f = rec.fields
+                    const isOpen = expandedDistId === rec.id
+                    const campus = campusInfoMap[f['校区名称']] || {}
+                    return (
+                      <>
+                        <tr key={rec.id} className="border-b border-gray-50 transition-colors hover:bg-gray-50/70">
+                          <td className="px-4 py-3 font-mono text-xs text-gray-500">{f['分发单号']}</td>
+                          <td className="px-4 py-3 text-xs text-gray-500">{f['订单编号']}</td>
+                          <td className="px-4 py-3 text-gray-700">{f['校区名称']}</td>
+                          <td className="px-4 py-3 text-xs text-gray-500">{f['所属分校']}</td>
+                          <td className="px-4 py-3 tabular-nums text-gray-700">{f['分配数量']}</td>
+                          <td className="px-4 py-3">
+                            <Badge status={f['状态'] === '已确认' ? 'confirmed' : 'pending_confirm'} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-1.5">
+                              <button
+                                className="text-xs text-gray-500 underline underline-offset-2 hover:text-gray-700"
+                                onClick={() => setExpandedDistId((prev) => (prev === rec.id ? null : rec.id))}
+                              >
+                                {isOpen ? '收起' : '收货信息'}
+                              </button>
+                              {f['状态'] === '待确认' && (
+                                <Button size="sm" onClick={() => confirmReceipt(rec)}>确认收货</Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                        {isOpen && (
+                          <tr key={`${rec.id}-detail`} className="bg-blue-50/40">
+                            <td colSpan={7} className="px-6 py-3">
+                              <div className="flex gap-8 text-xs text-gray-700">
+                                <div><span className="font-medium text-gray-500">地址：</span>{campus['地址'] || '—'}</div>
+                                <div><span className="font-medium text-gray-500">收件人：</span>{campus['收件人'] || '—'}</div>
+                                <div><span className="font-medium text-gray-500">电话：</span>{campus['电话'] || '—'}</div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
