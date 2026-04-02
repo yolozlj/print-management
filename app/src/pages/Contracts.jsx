@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { parseContractFile } from '../api/deepseek.js'
 import { useCache } from '../store/CacheContext.jsx'
 import { TABLES } from '../api/tables.js'
 import { createRecord, updateRecord, deleteRecord } from '../api/teable.js'
@@ -77,6 +78,8 @@ export default function Contracts() {
   const [editingContract, setEditingContract] = useState(null)
   const [contractForm, setContractForm] = useState(emptyContract)
   const [contractSaving, setContractSaving] = useState(false)
+  const [parsing, setParsing] = useState(false)
+  const [parsedPrices, setParsedPrices] = useState([])
 
   // Price modal
   const [priceModal, setPriceModal] = useState(false)
@@ -91,6 +94,31 @@ export default function Contracts() {
       .then(([c, p]) => { setContracts(c); setPriceRows(p) })
       .finally(() => setLoading(false))
   }, [getTableData])
+
+  async function handleContractFileParse(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setParsing(true)
+    setError('')
+    try {
+      const result = await parseContractFile(file)
+      setContractForm((prev) => {
+        const merged = { ...prev }
+        Object.entries(result.contract || {}).forEach(([k, v]) => {
+          if (v) merged[k] = v
+        })
+        return merged
+      })
+      if (result.prices?.length > 0) {
+        setParsedPrices(result.prices)
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setParsing(false)
+    }
+  }
 
   function openAddContract() {
     setEditingContract(null)
@@ -107,17 +135,26 @@ export default function Contracts() {
   }
 
   async function saveContract() {
-    if (!contractForm['合同编号'] || !contractForm['合同名称'] || !contractForm['有效期开始'] || !contractForm['有效期结束']) {
-      setError('合同编号、名称、有效期为必填项')
+    if (!contractForm['合同编号'] || !contractForm['合同名称']) {
+      setError('合同编号和合同名称为必填项')
       return
     }
     setContractSaving(true)
     setError('')
     try {
+      const savedContractCode = contractForm['合同编号']
       if (editingContract) {
         await updateRecord(TABLES.CONTRACT, editingContract.id, contractForm)
       } else {
         await createRecord(TABLES.CONTRACT, contractForm)
+        if (parsedPrices.length > 0) {
+          for (const price of parsedPrices) {
+            await createRecord(TABLES.PRICE_BASE, { ...price, 合同编号: savedContractCode })
+          }
+          invalidate(TABLES.PRICE_BASE)
+          setPriceRows(await getTableData(TABLES.PRICE_BASE, true))
+          setParsedPrices([])
+        }
       }
       invalidate(TABLES.CONTRACT)
       setContracts(await getTableData(TABLES.CONTRACT, true))
@@ -277,11 +314,11 @@ export default function Contracts() {
       {/* Contract Modal */}
       <Modal
         open={contractModal}
-        onClose={() => setContractModal(false)}
+        onClose={() => { setContractModal(false); setParsedPrices([]); setError('') }}
         title={editingContract ? '编辑合同' : '新增合同'}
         footer={
           <>
-            <Button variant="secondary" onClick={() => setContractModal(false)}>取消</Button>
+            <Button variant="secondary" onClick={() => { setContractModal(false); setParsedPrices([]); setError('') }}>取消</Button>
             <Button loading={contractSaving} onClick={saveContract}>保存</Button>
           </>
         }
@@ -290,6 +327,32 @@ export default function Contracts() {
           <p className="mb-3 rounded bg-yellow-50 px-3 py-2 text-xs text-yellow-700">
             修改合同名称会影响历史订单的关联关系，建议新建合同替代
           </p>
+        )}
+        {!editingContract && (
+          <div className="mb-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-700">上传合同图片自动解析</p>
+                <p className="mt-0.5 text-[11px] text-gray-400">支持 JPG / PNG / WEBP，解析结果会自动填入表单</p>
+              </div>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={handleContractFileParse}
+                />
+                <span className={`inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 ${parsing ? 'opacity-50 pointer-events-none' : ''}`}>
+                  {parsing ? '解析中…' : '选择文件'}
+                </span>
+              </label>
+            </div>
+            {parsedPrices.length > 0 && (
+              <p className="mt-2 text-[11px] text-blue-600">
+                已识别 {parsedPrices.length} 条价格明细，保存合同后可一键导入
+              </p>
+            )}
+          </div>
         )}
         {error && <p className="mb-2 text-xs text-red-500">{error}</p>}
         <ContractForm
