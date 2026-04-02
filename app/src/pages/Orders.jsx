@@ -160,7 +160,7 @@ export default function Orders() {
                   <span className="w-20 shrink-0 text-xs text-gray-500">
                     {f['提交时间'] ? f['提交时间'].slice(0, 10) : '-'}
                   </span>
-                  <div className="flex shrink-0 gap-1.5">
+                  <div className={`flex shrink-0 items-center gap-1.5 ${permissions?.approve_orders ? 'w-[164px]' : ''}`}>
                     <Button
                       size="sm"
                       variant="secondary"
