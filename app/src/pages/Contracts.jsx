@@ -9,6 +9,7 @@ import Modal from '../components/ui/Modal.jsx'
 import Input from '../components/ui/Input.jsx'
 import Badge from '../components/ui/Badge.jsx'
 import { isContractActive } from '../utils/price.js'
+import { parsePriceImport, downloadPriceTemplate } from '../utils/export.js'
 
 const emptyContract = { 合同编号: '', 合同名称: '', 有效期开始: '', 有效期结束: '', 适用分校: '', 备注: '' }
 const emptyPrice = { 合同编号: '', 类型: '', 成品尺寸: '', 装订要求: '', '封面/内页': '', 纸张种类: '', 纸张品牌: '', 印刷要求: '', 工艺要求: '', 数量起: '', 数量止: '', 印刷单价: '' }
@@ -88,6 +89,12 @@ export default function Contracts() {
   const [priceSaving, setPriceSaving] = useState(false)
 
   const [error, setError] = useState('')
+
+  // Price import modal
+  const [priceImporting, setPriceImporting] = useState(false)
+  const [priceImportRows, setPriceImportRows] = useState([])
+  const [priceImportModal, setPriceImportModal] = useState(false)
+  const [importTargetContract, setImportTargetContract] = useState('')
 
   useEffect(() => {
     Promise.all([getTableData(TABLES.CONTRACT), getTableData(TABLES.PRICE_BASE)])
@@ -239,6 +246,39 @@ export default function Contracts() {
     }
   }
 
+  async function handlePriceFileSelect(e, contractCode) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setError('')
+    try {
+      const rows = await parsePriceImport(file)
+      setImportTargetContract(contractCode)
+      setPriceImportRows(rows)
+      setPriceImportModal(true)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function submitPriceImport() {
+    setPriceImporting(true)
+    setError('')
+    try {
+      for (const row of priceImportRows) {
+        await createRecord(TABLES.PRICE_BASE, { ...row, 合同编号: importTargetContract })
+      }
+      invalidate(TABLES.PRICE_BASE)
+      setPriceRows(await getTableData(TABLES.PRICE_BASE, true))
+      setPriceImportModal(false)
+      setPriceImportRows([])
+    } catch {
+      setError('批量导入失败，请重试')
+    } finally {
+      setPriceImporting(false)
+    }
+  }
+
   const priceColumns = [
     { key: '类型', title: '类型' },
     { key: '成品尺寸', title: '成品尺寸' },
@@ -312,7 +352,26 @@ export default function Contracts() {
                   <div className="border-t border-gray-50 bg-gray-50 px-5 py-4">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-xs font-medium text-gray-500">价格明细（{detail.length} 条）</span>
-                      <Button size="sm" onClick={() => openAddPrice(f['合同编号'])}>新增价格行</Button>
+                      <div className="flex gap-2">
+                        <button
+                          className="text-xs text-gray-500 underline underline-offset-2 hover:text-gray-700"
+                          onClick={downloadPriceTemplate}
+                        >
+                          下载模板
+                        </button>
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept=".xlsx,.xls"
+                            className="hidden"
+                            onChange={(e) => handlePriceFileSelect(e, f['合同编号'])}
+                          />
+                          <span className="inline-flex cursor-pointer items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                            批量导入
+                          </span>
+                        </label>
+                        <Button size="sm" onClick={() => openAddPrice(f['合同编号'])}>新增价格行</Button>
+                      </div>
                     </div>
                     <Table
                       compact
@@ -395,6 +454,53 @@ export default function Contracts() {
           form={priceForm}
           onChange={(key, val) => setPriceForm((prev) => ({ ...prev, [key]: val }))}
         />
+      </Modal>
+
+      {/* 价格行批量导入预览 Modal */}
+      <Modal
+        open={priceImportModal}
+        onClose={() => { setPriceImportModal(false); setPriceImportRows([]) }}
+        title={`批量导入价格行（合同：${importTargetContract}）`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => { setPriceImportModal(false); setPriceImportRows([]) }}>取消</Button>
+            <Button loading={priceImporting} onClick={submitPriceImport}>
+              确认导入（{priceImportRows.length} 条）
+            </Button>
+          </>
+        }
+      >
+        {error && <p className="mb-2 text-xs text-red-500">{error}</p>}
+        <p className="mb-3 text-xs text-gray-500">预览前 10 条，请确认数据无误后导入：</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-gray-100">
+                {['类型','成品尺寸','装订要求','封面/内页','纸张种类','印刷要求','数量起','数量止','单价'].map((h) => (
+                  <th key={h} className="whitespace-nowrap px-2 py-1.5 text-left font-semibold text-gray-400">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {priceImportRows.slice(0, 10).map((row, i) => (
+                <tr key={i} className="border-b border-gray-50">
+                  <td className="px-2 py-1.5 text-gray-700">{row['类型']}</td>
+                  <td className="px-2 py-1.5 text-gray-700">{row['成品尺寸']}</td>
+                  <td className="px-2 py-1.5 text-gray-700">{row['装订要求']}</td>
+                  <td className="px-2 py-1.5 text-gray-700">{row['封面/内页']}</td>
+                  <td className="px-2 py-1.5 text-gray-700">{row['纸张种类']}</td>
+                  <td className="px-2 py-1.5 text-gray-700">{row['印刷要求']}</td>
+                  <td className="px-2 py-1.5 tabular-nums text-gray-700">{row['数量起']}</td>
+                  <td className="px-2 py-1.5 tabular-nums text-gray-700">{row['数量止']}</td>
+                  <td className="px-2 py-1.5 tabular-nums text-gray-700">{row['印刷单价']}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {priceImportRows.length > 10 && (
+          <p className="mt-2 text-[11px] text-gray-400">…还有 {priceImportRows.length - 10} 条</p>
+        )}
       </Modal>
     </div>
   )
