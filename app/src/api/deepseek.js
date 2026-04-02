@@ -74,7 +74,9 @@ export async function parseContractFile(file) {
 
   const data = await res.json()
   const content = data.choices?.[0]?.message?.content ?? ''
-  const jsonStr = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+  const jsonMatch = content.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) throw new Error('解析结果格式错误，请重试或手动填写')
+  const jsonStr = jsonMatch[0]
   try {
     return JSON.parse(jsonStr)
   } catch {

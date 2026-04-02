@@ -134,9 +134,16 @@ export default function Contracts() {
     setContractModal(true)
   }
 
+  function closeContractModal() {
+    setContractModal(false)
+    setParsedPrices([])
+    setParsing(false)
+    setError('')
+  }
+
   async function saveContract() {
-    if (!contractForm['合同编号'] || !contractForm['合同名称']) {
-      setError('合同编号和合同名称为必填项')
+    if (!contractForm['合同编号'] || !contractForm['合同名称'] || !contractForm['有效期开始'] || !contractForm['有效期结束']) {
+      setError('合同编号、名称、有效期为必填项')
       return
     }
     setContractSaving(true)
@@ -148,8 +155,18 @@ export default function Contracts() {
       } else {
         await createRecord(TABLES.CONTRACT, contractForm)
         if (parsedPrices.length > 0) {
-          for (const price of parsedPrices) {
-            await createRecord(TABLES.PRICE_BASE, { ...price, 合同编号: savedContractCode })
+          const results = await Promise.allSettled(
+            parsedPrices.map((price) =>
+              createRecord(TABLES.PRICE_BASE, { ...price, 合同编号: savedContractCode })
+            )
+          )
+          const failed = results.filter((r) => r.status === 'rejected').length
+          if (failed > 0) {
+            setError(`合同已保存，但 ${parsedPrices.length} 条价格明细中有 ${failed} 条导入失败`)
+            // 不关闭 Modal，让用户看到错误
+            invalidate(TABLES.PRICE_BASE)
+            setPriceRows(await getTableData(TABLES.PRICE_BASE, true))
+            return
           }
           invalidate(TABLES.PRICE_BASE)
           setPriceRows(await getTableData(TABLES.PRICE_BASE, true))
@@ -158,7 +175,7 @@ export default function Contracts() {
       }
       invalidate(TABLES.CONTRACT)
       setContracts(await getTableData(TABLES.CONTRACT, true))
-      setContractModal(false)
+      closeContractModal()
     } catch {
       setError('保存失败，请重试')
     } finally {
@@ -314,11 +331,11 @@ export default function Contracts() {
       {/* Contract Modal */}
       <Modal
         open={contractModal}
-        onClose={() => { setContractModal(false); setParsedPrices([]); setError('') }}
+        onClose={closeContractModal}
         title={editingContract ? '编辑合同' : '新增合同'}
         footer={
           <>
-            <Button variant="secondary" onClick={() => { setContractModal(false); setParsedPrices([]); setError('') }}>取消</Button>
+            <Button variant="secondary" onClick={closeContractModal}>取消</Button>
             <Button loading={contractSaving} onClick={saveContract}>保存</Button>
           </>
         }
