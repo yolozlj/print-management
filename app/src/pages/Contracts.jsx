@@ -261,6 +261,7 @@ export default function Contracts() {
                       <Button size="sm" onClick={() => openAddPrice(f['合同编号'])}>新增价格行</Button>
                     </div>
                     <Table
+                      compact
                       columns={priceColumns}
                       data={detail.map((r) => ({ ...r.fields, _record: r }))}
                       emptyText="该合同暂无价格数据"

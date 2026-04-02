@@ -11,6 +11,7 @@ export default function Table({
   loading = false,
   emptyText = '暂无数据',
   className = '',
+  compact = false,
 }) {
   return (
     <div className={`w-full overflow-x-auto ${className}`}>
@@ -20,7 +21,7 @@ export default function Table({
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`whitespace-nowrap px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}
+                className={`whitespace-nowrap px-4 ${compact ? 'py-2' : 'py-3'} text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}
               >
                 {col.title}
               </th>
@@ -32,7 +33,7 @@ export default function Table({
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i} className="border-b border-gray-50">
                 {columns.map((col) => (
-                  <td key={col.key} className="px-4 py-3">
+                  <td key={col.key} className={`px-4 ${compact ? 'py-1.5' : 'py-3'}`}>
                     <div className="h-4 animate-pulse rounded-md bg-gray-100" />
                   </td>
                 ))}
@@ -54,7 +55,7 @@ export default function Table({
                 className="border-b border-gray-50 transition-colors duration-100 last:border-0 hover:bg-gray-50/70"
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={`px-4 py-3 text-gray-700 ${col.tdClassName ?? ''} ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}>
+                  <td key={col.key} className={`px-4 ${compact ? 'py-1.5' : 'py-3'} text-gray-700 ${col.tdClassName ?? ''} ${col.sticky ? 'sticky left-0 z-10 bg-white' : ''}`}>
                     {col.render ? col.render(row[col.key], row) : (row[col.key] ?? '-')}
                   </td>
                 ))}
