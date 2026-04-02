@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchAllRecords, createRecord } from '../api/teable.js'
 import { hashPassword } from '../utils/auth.js'
 import { TABLES } from '../api/tables.js'
 import Button from '../components/ui/Button.jsx'
 import Input from '../components/ui/Input.jsx'
+import Select from '../components/ui/Select.jsx'
 
 /**
  * 注册页 — 超极简主义
@@ -21,6 +22,23 @@ export default function Register() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [campusRecords, setCampusRecords] = useState([])
+
+  useEffect(() => {
+    fetchAllRecords(TABLES.CAMPUS)
+      .then((recs) => setCampusRecords(recs))
+      .catch(() => {})
+  }, [])
+
+  // 从校区记录中提取唯一分校列表
+  const branchOptions = [...new Set(
+    campusRecords.map((r) => r.fields['所属分校']).filter(Boolean)
+  )].map((b) => ({ value: b, label: b }))
+
+  // 按选中分校过滤校区列表（分校为空时显示全部）
+  const campusOptions = campusRecords
+    .filter((r) => !form.branch || r.fields['所属分校'] === form.branch)
+    .map((r) => ({ value: r.fields['校区名称'], label: r.fields['校区名称'] }))
 
   function setField(key) {
     return (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))
@@ -143,17 +161,22 @@ export default function Register() {
               onChange={setField('name')}
               placeholder="您的真实姓名"
             />
-            <Input
+            <Select
               label="所属分校"
               value={form.branch}
-              onChange={setField('branch')}
-              placeholder="如：北京分校"
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, branch: e.target.value, campus: '' }))
+              }}
+              options={branchOptions}
+              placeholder="请选择分校（选填）"
             />
-            <Input
+            <Select
               label="所属校区"
               value={form.campus}
               onChange={setField('campus')}
-              placeholder="如：朝阳校区"
+              options={campusOptions}
+              placeholder="请选择校区（选填）"
+              disabled={campusOptions.length === 0 && !form.branch}
             />
 
             {/* 错误信息 */}
