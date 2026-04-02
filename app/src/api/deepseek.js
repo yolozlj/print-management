@@ -53,7 +53,7 @@ export async function parseContractFile(file) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'deepseek-chat',
+      model: 'deepseek-vl2',
       messages: [
         {
           role: 'user',
